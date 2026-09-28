@@ -20,9 +20,13 @@ export interface Supplier {
   email: string | null
   phone: string | null
   notes: string | null
+  orderEmail: string | null
+  searchUrlTemplate: string | null
+  amazon: boolean
+  amazonDomain: string
 }
 
-export interface Offer { id: string, item: string, store: { id: string, name: string, kind: string }, preferred: boolean, price: number | null, packSize: number }
+export interface Offer { id: string, item: string, store: { id: string, name: string, kind: string }, preferred: boolean, price: number | null, packSize: number, asin: string | null, productUrl: string | null }
 
 export interface Item {
   id: string
@@ -33,6 +37,7 @@ export interface Item {
   unit: string
   category: Category
   sku: string | null
+  ean: string | null
   reorderThreshold: number
   unitCost: number | null
   supplier: { id: string, name: string } | null
@@ -94,7 +99,7 @@ export interface Equipment {
 
 export interface CartLine {
   id: string
-  item: { id: string, name: string, unit: string, category: Category }
+  item: { id: string, name: string, unit: string, category: Category, ean: string | null }
   placeId: string
   location: string
   quantity: number
@@ -103,6 +108,8 @@ export interface CartLine {
   packPrice: number | null
   estimatedCost: number | null
   checked: boolean
+  asin: string | null
+  productUrl: string | null
 }
 
 export interface ShoppingCart {
@@ -114,7 +121,7 @@ export interface ShoppingCart {
   lineCount: number
   checkedCount: number
   estimatedTotal: number
-  stores: { store: { id: string, name: string, address: string | null, openingHours: string | null } | null, lines: CartLine[], estimatedTotal: number }[]
+  stores: { store: { id: string, name: string, kind: string, address: string | null, openingHours: string | null, amazon: boolean, orderEmail: boolean } | null, lines: CartLine[], estimatedTotal: number }[]
 }
 
 export interface ShoppingList {
@@ -122,3 +129,9 @@ export interface ShoppingList {
   byStore: { store: { id: string, name: string } | null, lines: number, estimatedCost: number }[]
   estimatedTotal: number
 }
+
+export interface StoreCart { store: { id: string, name: string }, urls: string[], lineCount: number, skipped: string[] }
+
+export interface PurchaseOrder { id: string, cartId: string, supplier: { id: string, name: string }, recipient: string, sentBy: string, sentAt: string, messageId: string | null, status: 'queued' | 'demo', lineCount: number }
+
+export interface PurchaseOrderPreview { to: string[], subject: string, text: string, htmlBody: string, estimatedTotal: number, alreadySent: PurchaseOrder | null }
