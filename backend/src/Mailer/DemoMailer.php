@@ -26,10 +26,15 @@ final class DemoMailer
      *
      * @return array<string, mixed>
      */
-    public function send(array $email, string $asUser): array
+    public function send(array $email, string $asUser, ?string $idempotencyKey = null): array
     {
         $sent = $this->sent();
-        $record = ['id' => Uuid::v7()->toRfc4122(), 'status' => 'demo', 'as' => $asUser, 'to' => $email['to'] ?? [], 'subject' => (string) ($email['subject'] ?? ''), 'htmlBody' => (string) ($email['htmlBody'] ?? ''), 'createdAt' => (new \DateTimeImmutable())->format(\DATE_ATOM)];
+        foreach (null === $idempotencyKey ? [] : $sent as $previous) {
+            if (($previous['idempotencyKey'] ?? null) === $idempotencyKey) {
+                return $previous;
+            }
+        }
+        $record = ['id' => Uuid::v7()->toRfc4122(), 'status' => 'demo', 'as' => $asUser, 'to' => $email['to'] ?? [], 'subject' => (string) ($email['subject'] ?? ''), 'htmlBody' => (string) ($email['htmlBody'] ?? ''), 'idempotencyKey' => $idempotencyKey, 'createdAt' => (new \DateTimeImmutable())->format(\DATE_ATOM)];
         $sent[] = $record;
         if (!is_dir(\dirname($this->demoMailerPath))) {
             mkdir(\dirname($this->demoMailerPath), 0o775, true);

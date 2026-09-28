@@ -48,6 +48,14 @@ class CartLine
     #[ORM\Column]
     private bool $checked = false;
 
+    /** Copied from the offer when the cart is built (Amazon cart link). */
+    #[ORM\Column(length: 16, nullable: true)]
+    private ?string $asin = null;
+
+    /** Copied from the offer when the cart is built ("Voir sur le site"). */
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $productUrl = null;
+
     public function __construct(ShoppingCart $cart, Item $item, Location $location, float $quantity, int $position)
     {
         $this->id = Uuid::v7();
@@ -72,6 +80,17 @@ class CartLine
     public function isChecked(): bool { return $this->checked; }
     public function setChecked(bool $c): static { $this->checked = $c; return $this; }
 
+    public function getAsin(): ?string { return $this->asin; }
+    public function setAsin(?string $a): static { $this->asin = $a; return $this; }
+    public function setProductUrl(?string $u): static { $this->productUrl = $u; return $this; }
+    public function getPackPrice(): ?float { return $this->packPrice; }
+
+    /** The product on the store's website: the offer's link, else the store's search template. */
+    public function productUrl(): ?string
+    {
+        return $this->productUrl ?? $this->store?->searchUrl($this->item->getEan(), $this->item->getName());
+    }
+
     public function packs(): float
     {
         return ceil(round($this->quantity / $this->packSize, 6));
@@ -91,10 +110,10 @@ class CartLine
     {
         return [
             'id' => $this->id->toRfc4122(),
-            'item' => ['id' => $this->item->getId()->toRfc4122(), 'name' => $this->item->getName(), 'unit' => $this->item->getUnit(), 'category' => $this->item->getCategory()],
+            'item' => ['id' => $this->item->getId()->toRfc4122(), 'name' => $this->item->getName(), 'unit' => $this->item->getUnit(), 'category' => $this->item->getCategory(), 'ean' => $this->item->getEan()],
             'placeId' => $this->location->getPlaceId(), 'location' => $this->location->getName(),
             'quantity' => $this->quantity, 'packSize' => $this->packSize, 'packs' => $this->packs(), 'packPrice' => $this->packPrice,
-            'estimatedCost' => $this->getEstimatedCost(), 'checked' => $this->checked,
+            'estimatedCost' => $this->getEstimatedCost(), 'checked' => $this->checked, 'asin' => $this->asin, 'productUrl' => $this->productUrl(),
         ];
     }
 }
