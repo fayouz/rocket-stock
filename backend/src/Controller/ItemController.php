@@ -7,6 +7,7 @@ use App\Entity\ItemOffer;
 use App\Entity\Supplier;
 use App\Repository\ItemOfferRepository;
 use App\Repository\ItemRepository;
+use App\Ordering\Ean;
 use App\Stock\Payload;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -58,7 +59,7 @@ final class ItemController extends AbstractController
         return $this->json($this->offersOf($item));
     }
 
-    /** JSON list [{"store": id|IRI, "preferred"?: bool, "price"?: number, "packSize"?: number}]: replaces the offers of the article. */
+    /** JSON list [{"store": id|IRI, "preferred"?: bool, "price"?: number, "packSize"?: number, "asin"?, "productUrl"?}]: replaces the offers of the article. */
     #[Route('/api/stock-items/{id}/offers', name: 'api_stock_item_offers_update', methods: ['PUT'], requirements: ['id' => Requirement::UUID])]
     #[IsGranted('STOCK_MANAGE')]
     public function setOffers(#[MapEntity] Item $item, Request $request): JsonResponse
@@ -80,7 +81,12 @@ final class ItemController extends AbstractController
                 continue;
             }
             $seen[$store->getId()->toRfc4122()] = true;
-            $this->em->persist((new ItemOffer($item, $store))->setPreferred((bool) $p->raw('preferred'))->setPrice($p->float('price'))->setPackSize($p->float('packSize') ?? 1.0));
+            $asin = $p->string('asin', 16);
+            if (null !== $asin && !preg_match('/^[A-Z0-9]{10}$/i', $asin)) {
+                throw new HttpException(422, 'Champ « asin » : 10 lettres ou chiffres attendus.');
+            }
+            $this->em->persist((new ItemOffer($item, $store))->setPreferred((bool) $p->raw('preferred'))->setPrice($p->float('price'))->setPackSize($p->float('packSize') ?? 1.0)
+                ->setAsin($asin)->setProductUrl(SupplierController::url($p->string('productUrl', 500), 'productUrl')));
         }
         $this->em->flush();
 
@@ -148,6 +154,13 @@ final class ItemController extends AbstractController
             if ($p->has($key)) {
                 $item->{'set'.ucfirst($key)}($p->string($key, $max));
             }
+        }
+        if ($p->has('ean')) {
+            $ean = Ean::normalize($p->string('ean', 20));
+            if (null !== $ean && !Ean::isValid($ean)) {
+                throw new HttpException(422, 'Champ « ean » : code EAN-13 ou EAN-8 invalide (chiffre de contrôle).');
+            }
+            $item->setEan($ean);
         }
         if ($p->has('notes')) {
             $item->setNotes($p->string('notes', 2000));

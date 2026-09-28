@@ -11,13 +11,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Suppliers and stores {"name", "kind"?: supplier|store, "address"?, "lat"?, "lng"?, "openingHours"?, "website"?, "email"?,
- * "phone"?, "notes"?}. Writes: STOCK_MANAGE. /api/stores is the same list restricted to kind "store".
+ * "phone"?, "notes"?, "orderEmail"?, "searchUrlTemplate"? (with {ean} or {name}), "amazon"?: bool, "amazonDomain"?}. Writes: STOCK_MANAGE. /api/stores is the same list restricted to kind "store".
  */
 #[IsGranted('STOCK_READ')]
 final class SupplierController extends AbstractController
@@ -94,10 +95,40 @@ final class SupplierController extends AbstractController
                 $s->{'set'.ucfirst($key)}($p->float($key));
             }
         }
+        if ($p->has('amazon')) {
+            $s->setAmazon((bool) $p->raw('amazon'));
+        }
+        if ($p->has('amazonDomain')) {
+            $domain = strtolower((string) $p->string('amazonDomain', 40));
+            if ('' !== $domain && !preg_match('/^amazon\.[a-z.]{2,10}$/', $domain)) {
+                throw new HttpException(422, 'Champ « amazonDomain » : domaine Amazon attendu (amazon.fr, amazon.de…).');
+            }
+            $s->setAmazonDomain($domain);
+        }
+        if ($p->has('orderEmail')) {
+            $email = $p->string('orderEmail', 180);
+            if (null !== $email && false === filter_var($email, \FILTER_VALIDATE_EMAIL)) {
+                throw new HttpException(422, 'Champ « orderEmail » : adresse e-mail invalide.');
+            }
+            $s->setOrderEmail($email);
+        }
+        if ($p->has('searchUrlTemplate')) {
+            $s->setSearchUrlTemplate(self::url($p->string('searchUrlTemplate', 255), 'searchUrlTemplate'));
+        }
         foreach (['address' => 255, 'openingHours' => 255, 'website' => 255, 'email' => 180, 'phone' => 40, 'notes' => 2000] as $key => $max) {
             if ($p->has($key)) {
                 $s->{'set'.ucfirst($key)}($p->string($key, $max));
             }
         }
+    }
+
+    /** An http(s) URL or null (422 otherwise). */
+    public static function url(?string $v, string $key): ?string
+    {
+        if (null !== $v && !preg_match('#^https?://[^\s]+$#i', $v)) {
+            throw new HttpException(422, \sprintf('Champ « %s » : adresse http(s) attendue.', $key));
+        }
+
+        return $v;
     }
 }

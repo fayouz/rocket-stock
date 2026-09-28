@@ -41,23 +41,24 @@ final class MailerClient
     }
 
     /**
-     * Queues an e-mail in Rocket Mailer.
+     * Queues an e-mail in Rocket Mailer. $idempotencyKey: sent as Idempotency-Key (Rocket Mailer answers the same
+     * e-mail again instead of queueing a second one).
      *
      * @param array{to: list<string>, subject: string, htmlBody: string} $email
      *
      * @return array<string, mixed> the queued e-mail (id, status…)
      */
-    public function send(string $asUser, array $email): array
+    public function send(string $asUser, array $email, ?string $idempotencyKey = null): array
     {
         if ($this->isDemo()) {
-            return $this->demo->send($email, $asUser);
+            return $this->demo->send($email, $asUser, $idempotencyKey);
         }
         if ('' !== trim($this->mailerMailbox)) {
             $email['mailbox'] = '/api/mailboxes/'.rawurlencode(trim($this->mailerMailbox));
         }
         try {
             $response = $this->http->request('POST', rtrim($this->mailerUrl, '/').'/api/emails', [
-                'headers' => ['Accept' => 'application/json', 'Authorization' => 'Bearer '.$this->bearer(), 'X-Impersonate-User' => $asUser],
+                'headers' => ['Accept' => 'application/json', 'Authorization' => 'Bearer '.$this->bearer(), 'X-Impersonate-User' => $asUser] + (null === $idempotencyKey ? [] : ['Idempotency-Key' => $idempotencyKey]),
                 'json' => $email,
                 'timeout' => self::TIMEOUT,
             ]);
