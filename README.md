@@ -44,12 +44,22 @@ php bin/phpunit
 cd frontend && npm install && NUXT_PUBLIC_API_BASE=http://localhost:9100 npm run dev -- --port 4100
 ```
 
+## Installer sur téléphone
+
+Application web installable (PWA), sans store :
+
+- **Android (Chrome)** : bouton **Installer l’application** (page *Courses*) ou menu ⋮ › *Installer l’application*.
+- **iPhone (Safari)** : **Partager** › **Sur l’écran d’accueil**.
+
+Ouverture sur `/courses`, raccourcis *Liste de courses* et *Panier*. Hors ligne, le panier garde ses dernières données (badge **Hors ligne**) et met en file les lignes cochées jusqu’au retour du réseau. Service worker actif en production seulement (`NUXT_PUBLIC_PWA=false` pour le couper). Icônes : `node frontend/scripts/pwa-icons.mjs`. Détails : `docs/content/2.usage/7.telephone.md`.
+
 ## Configuration
 
 | Variable | Rôle |
 |---|---|
 | `ROCKET_PLACE_URL` / `ROCKET_PLACE_TOKEN` | Rocket Place (lieux), jeton d'application `rpl_…`. Vide : lieux locaux. |
 | `ROCKET_MAILER_URL`, `ROCKET_MAILER_TOKEN`, `ROCKET_MAILER_MAILBOX`, `ROCKET_MAILER_SENDER` | Rocket Mailer (alertes). Vide : démo (`var/demo-mailer-<env>.json`). |
+| `AMAZON_ASSOCIATE_TAG` | Identifiant Partenaires Amazon des paniers pré-remplis. Vide par défaut. |
 | `STOCK_ALERT_EMAILS` | Destinataires des alertes de stock bas, séparés par des virgules. Vide (défaut) : aucune alerte. |
 | `ROCKET_AUTH_URL`, `ROCKET_AUTH_INTERNAL_URL`, `ROCKET_AUTH_CLIENT_ID` (`rocket-stock`), `ROCKET_AUTH_CLIENT_SECRET`, `ROCKET_AUTH_ADMIN_GROUP`, `ROCKET_PUBLIC_URL`, `ROCKET_INTERNAL_URL` | Mode suite. En suite, Place et Mailer sont appelés avec un jeton Rocket Auth (audiences `rocket-place`, `rocket-mailer`), les jetons statiques restent le repli. |
 

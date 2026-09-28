@@ -37,6 +37,7 @@ async function createCart() {
           <UDashboardSidebarCollapse />
         </template>
         <template #right>
+          <PwaInstallButton />
           <USelect v-model="place" :items="placeItems" class="w-44" />
           <UButton icon="i-lucide-shopping-cart" label="Créer un panier" :loading="creating" :disabled="!list?.lines.length" @click="createCart" />
         </template>

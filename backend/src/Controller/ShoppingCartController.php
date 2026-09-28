@@ -71,7 +71,8 @@ final class ShoppingCartController extends AbstractController
         foreach ($this->replenishment->needs($placeId) as $i => ['level' => $level, 'offer' => $offer, 'quantity' => $qty]) {
             $line = (new CartLine($cart, $level->getItem(), $level->getLocation(), $qty, $i))
                 ->setStore($offer?->getSupplier() ?? $level->getItem()->getSupplier())
-                ->setPackSize($offer?->getPackSize() ?? 1.0)->setPackPrice($offer?->getPrice());
+                ->setPackSize($offer?->getPackSize() ?? 1.0)->setPackPrice($offer?->getPrice())
+                ->setAsin($offer?->getAsin() ?? $level->getItem()->getAsin())->setProductUrl($offer?->getProductUrl());
             $cart->addLine($line);
         }
         if (0 === $cart->getLines()->count()) {
@@ -99,8 +100,9 @@ final class ShoppingCartController extends AbstractController
             $out[] = '';
             $out[] = '== '.($group['store']['name'] ?? 'Sans magasin').(0.0 < $group['estimatedTotal'] ? \sprintf(' (≈ %s €)', number_format($group['estimatedTotal'], 2, ',', ' ')) : '').' ==';
             foreach ($group['lines'] as $line) {
-                $out[] = \sprintf('%s %s %s %s%s', $line['checked'] ? '[x]' : '[ ]', self::num($line['quantity']), $line['item']['unit'], $line['item']['name'],
-                    $line['packSize'] > 1 ? \sprintf(' (%s × %s)', self::num($line['packs']), self::num($line['packSize'])) : '');
+                $out[] = \sprintf('%s %s %s %s%s%s', $line['checked'] ? '[x]' : '[ ]', self::num($line['quantity']), $line['item']['unit'], $line['item']['name'],
+                    $line['packSize'] > 1 ? \sprintf(' (%s × %s)', self::num($line['packs']), self::num($line['packSize'])) : '',
+                    null !== $line['item']['ean'] ? ' — EAN '.$line['item']['ean'] : '');
             }
         }
         if (0.0 < $data['estimatedTotal']) {

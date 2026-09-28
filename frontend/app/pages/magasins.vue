@@ -9,13 +9,13 @@ useHead({ title: `Magasins · ${useAppConfig().rocket.name}` })
 
 const { data: suppliers, refresh } = await useAsyncData('suppliers', () => api<Supplier[]>('/api/suppliers'), { default: () => [] })
 const kindItems = [{ value: 'store', label: 'Magasin' }, { value: 'supplier', label: 'Fournisseur' }]
-const blank = () => ({ id: '', name: '', kind: 'store' as Supplier['kind'], address: '', lat: '', lng: '', openingHours: '', website: '', email: '', phone: '', notes: '' })
+const blank = () => ({ id: '', name: '', kind: 'store' as Supplier['kind'], address: '', lat: '', lng: '', openingHours: '', website: '', email: '', phone: '', notes: '', orderEmail: '', searchUrlTemplate: '', amazon: false, amazonDomain: 'amazon.fr' })
 const form = reactive(blank())
 const open = ref(false)
 const num = (v: string) => v === '' ? null : Number(String(v).replace(',', '.'))
 
 function edit(s?: Supplier) {
-  Object.assign(form, blank(), s ? { ...Object.fromEntries(Object.entries(s).map(([k, v]) => [k, v === null ? '' : String(v)])) } : {})
+  Object.assign(form, blank(), s ? { ...Object.fromEntries(Object.entries(s).map(([k, v]) => [k, v === null ? '' : String(v)])), amazon: s.amazon } : {})
   open.value = true
 }
 async function save() {
@@ -62,6 +62,11 @@ const mapUrl = (s: Supplier) => s.lat !== null && s.lng !== null ? `https://www.
                 <a v-if="mapUrl(s)" :href="mapUrl(s)!" target="_blank" rel="noopener" class="text-primary hover:underline">Carte</a>
                 <a v-if="s.phone" :href="`tel:${s.phone}`" class="text-primary hover:underline">{{ s.phone }}</a>
               </p>
+              <p v-if="s.amazon || s.orderEmail || s.searchUrlTemplate" class="flex flex-wrap gap-1">
+                <UBadge v-if="s.amazon" color="warning" variant="subtle" :label="`Panier ${s.amazonDomain}`" />
+                <UBadge v-if="s.orderEmail" variant="subtle" icon="i-lucide-mail" :label="`Commandes : ${s.orderEmail}`" />
+                <UBadge v-if="s.searchUrlTemplate" variant="subtle" icon="i-lucide-external-link" label="Lien produit" />
+              </p>
             </div>
             <span v-if="isAdmin" class="flex gap-1">
               <UButton size="sm" variant="ghost" icon="i-lucide-pencil" aria-label="Modifier" @click="edit(s)" />
@@ -84,6 +89,10 @@ const mapUrl = (s: Supplier) => s.lat !== null && s.lng !== null ? `https://www.
           <UFormField label="Horaires" class="sm:col-span-2"><UInput v-model="form.openingHours" placeholder="lun-sam 8h30-20h" class="w-full" /></UFormField>
           <UFormField label="Site web"><UInput v-model="form.website" class="w-full" /></UFormField>
           <UFormField label="Téléphone"><UInput v-model="form.phone" class="w-full" /></UFormField>
+          <UFormField label="E-mail de commande" help="Bons de commande envoyés depuis un panier, après confirmation." class="sm:col-span-2"><UInput v-model="form.orderEmail" type="email" class="w-full" /></UFormField>
+          <UFormField label="Recherche produit sur le site" help="{ean} ou {name} est remplacé : https://www.carrefour.fr/s?q={ean}" class="sm:col-span-2"><UInput v-model="form.searchUrlTemplate" class="w-full" /></UFormField>
+          <UCheckbox v-model="form.amazon" label="Amazon (panier pré-rempli)" />
+          <UFormField v-if="form.amazon" label="Domaine Amazon"><UInput v-model="form.amazonDomain" placeholder="amazon.fr" class="w-full" /></UFormField>
           <UFormField label="Notes" class="sm:col-span-2"><UTextarea v-model="form.notes" class="w-full" /></UFormField>
         </div>
       </template>
