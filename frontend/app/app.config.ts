@@ -19,9 +19,13 @@ export default defineAppConfig({
     publicPaths: [] as string[],
     // Main menu: the domain pages ("label" entries start a group).
     navigation: [
-      { label: 'Ménage', type: 'label' },
-      { label: 'Ménages du jour', icon: 'i-lucide-package', to: '/menage' },
+      { label: 'Stock', type: 'label' },
+      { label: 'Courses', icon: 'i-lucide-shopping-cart', to: '/courses' },
       { label: 'Lieux', icon: 'i-lucide-map-pin', to: '/places' },
+      { label: 'Mouvements', icon: 'i-lucide-arrow-left-right', to: '/mouvements' },
+      { label: 'Catalogue', icon: 'i-lucide-package', to: '/catalogue' },
+      { label: 'Magasins', icon: 'i-lucide-store', to: '/magasins' },
+      { label: 'Équipements', icon: 'i-lucide-wrench', to: '/equipements' },
     ] as { label: string, icon?: string, to?: string, type?: 'label', exact?: boolean, exactQuery?: boolean, admin?: boolean }[],
     // Extra entries of the Administration menu.
     adminNavigation: [
