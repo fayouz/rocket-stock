@@ -1,0 +1,4 @@
+rocket_core:
+    app_name: Rocket Stock
+    app_id: stock
+    token_prefix: rst_
