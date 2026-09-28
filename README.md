@@ -14,7 +14,7 @@ Le socle commun (comptes, LDAP, SSO / Rocket Auth, applications externes, tablea
 
 Le stock référence un lieu par son **identifiant** (`placeId`, UUID), jamais par clé étrangère : Rocket Stock ne possède aucun lieu (même schéma que Rocket Clean).
 
-- **Avec Rocket Place** (`ROCKET_PLACE_URL` + `ROCKET_PLACE_TOKEN` `rpl_…`, ou jeton Rocket Auth en mode suite) : lieux de Place (`/api/places`), lus par `App\Place\PlaceClient`, nom en cache dans `Site`.
+- **Avec Rocket Place** (`ROCKET_PLACE_URL` + secret `rocket.place.token` `rpl_…`, ou jeton Rocket Auth en mode suite) : lieux de Place (`/api/places`), lus par `App\Place\PlaceClient`, nom en cache dans `Site`.
 - **Autonome** (sans `ROCKET_PLACE_URL`) : lieux locaux (entité `Site`) créés dans Rocket Stock.
 
 ## Démarrage rapide
@@ -57,11 +57,27 @@ Ouverture sur `/courses`, raccourcis *Liste de courses* et *Panier*. Hors ligne,
 
 | Variable | Rôle |
 |---|---|
-| `ROCKET_PLACE_URL` / `ROCKET_PLACE_TOKEN` | Rocket Place (lieux), jeton d'application `rpl_…`. Vide : lieux locaux. |
-| `ROCKET_MAILER_URL`, `ROCKET_MAILER_TOKEN`, `ROCKET_MAILER_MAILBOX`, `ROCKET_MAILER_SENDER` | Rocket Mailer (alertes). Vide : démo (`var/demo-mailer-<env>.json`). |
+| `ROCKET_SECRETS_KEY` | Clé maîtresse du coffre des secrets (rocket-core, `php bin/console rocket:secrets:generate-key`). Seule clé à garder dans l'environnement ; la sauvegarder hors de la base. |
+| `ROCKET_PLACE_URL` | Rocket Place (lieux) ; jeton `rpl_…` dans le coffre (`rocket.place.token`). Vide : lieux locaux. |
+| `ROCKET_MAILER_URL`, `ROCKET_MAILER_MAILBOX`, `ROCKET_MAILER_SENDER` | Rocket Mailer (alertes) ; jeton `rma_…` dans le coffre (`rocket.mailer.token`). Vide : démo (`var/demo-mailer-<env>.json`). |
 | `AMAZON_ASSOCIATE_TAG` | Identifiant Partenaires Amazon des paniers pré-remplis. Vide par défaut. |
 | `STOCK_ALERT_EMAILS` | Destinataires des alertes de stock bas, séparés par des virgules. Vide (défaut) : aucune alerte. |
 | `ROCKET_AUTH_URL`, `ROCKET_AUTH_INTERNAL_URL`, `ROCKET_AUTH_CLIENT_ID` (`rocket-stock`), `ROCKET_AUTH_CLIENT_SECRET`, `ROCKET_AUTH_ADMIN_GROUP`, `ROCKET_PUBLIC_URL`, `ROCKET_INTERNAL_URL` | Mode suite. En suite, Place et Mailer sont appelés avec un jeton Rocket Auth (audiences `rocket-place`, `rocket-mailer`), les jetons statiques restent le repli. |
+
+## Secrets des intégrations (coffre)
+
+Les jetons vers les autres briques sont gardés **chiffrés en base** dans le coffre de rocket-core (Administration → **Secrets**), plus dans le `.env`. Le code les lit par `App\Secrets\IntegrationSecrets` ; l'API ne renvoie jamais leur valeur (aperçu masqué `••••1234`).
+
+| Ancienne variable | Secret du coffre |
+|---|---|
+| `ROCKET_PLACE_TOKEN` | `rocket.place.token` |
+| `ROCKET_MAILER_TOKEN` | `rocket.mailer.token` |
+
+Migration d'une instance existante :
+
+1. `php bin/console rocket:secrets:generate-key` → `ROCKET_SECRETS_KEY` dans `.env.local` (ou l'environnement du conteneur) ; `php bin/console doctrine:migrations:migrate`.
+2. `php bin/console app:secrets:migrate-env --dry-run` puis `php bin/console app:secrets:migrate-env` : importe les variables ci-dessus sous leur nom de secret (idempotent, `--overwrite` pour remplacer).
+3. Retirer ces variables du `.env.local` / de l'environnement. Pendant la transition, une variable encore présente sert de repli (avertissement « deprecated » dans les journaux).
 
 ## API (Host, Place, Clean, PMS)
 
