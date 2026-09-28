@@ -7,6 +7,7 @@ parameters:
     env(ROCKET_MAILER_MAILBOX): ''
     env(ROCKET_MAILER_SENDER): ''
     env(STOCK_ALERT_EMAILS): ''
+    env(AMAZON_ASSOCIATE_TAG): ''
 
 services:
     _defaults:
@@ -20,6 +21,7 @@ services:
             $mailerMailbox: '%env(ROCKET_MAILER_MAILBOX)%'
             $demoMailerPath: '%kernel.project_dir%/var/demo-mailer-%kernel.environment%.json'
             $alertEmails: '%env(STOCK_ALERT_EMAILS)%'
+            $amazonAssociateTag: '%env(AMAZON_ASSOCIATE_TAG)%'
 
     App\:
         resource: '../src/'

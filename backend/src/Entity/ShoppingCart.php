@@ -76,7 +76,7 @@ class ShoppingCart
         foreach ($this->lines as $line) {
             $store = $line->getStore();
             $key = $store?->getId()->toRfc4122() ?? '';
-            $groups[$key] ??= ['store' => null === $store ? null : ['id' => $key, 'name' => $store->getName(), 'kind' => $store->getKind(), 'address' => $store->toArray()['address'], 'openingHours' => $store->toArray()['openingHours']], 'lines' => [], 'estimatedTotal' => 0.0];
+            $groups[$key] ??= ['store' => null === $store ? null : ['id' => $key, 'name' => $store->getName(), 'kind' => $store->getKind(), 'address' => $store->toArray()['address'], 'openingHours' => $store->toArray()['openingHours'], 'amazon' => $store->isAmazon(), 'orderEmail' => null !== $store->getOrderEmail()], 'lines' => [], 'estimatedTotal' => 0.0];
             $groups[$key]['lines'][] = $line->toArray();
             $groups[$key]['estimatedTotal'] = round($groups[$key]['estimatedTotal'] + ($line->getEstimatedCost() ?? 0.0), 2);
             $total += $line->getEstimatedCost() ?? 0.0;

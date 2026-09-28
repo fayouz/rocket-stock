@@ -59,6 +59,7 @@ Ouverture sur `/courses`, raccourcis *Liste de courses* et *Panier*. Hors ligne,
 |---|---|
 | `ROCKET_PLACE_URL` / `ROCKET_PLACE_TOKEN` | Rocket Place (lieux), jeton d'application `rpl_…`. Vide : lieux locaux. |
 | `ROCKET_MAILER_URL`, `ROCKET_MAILER_TOKEN`, `ROCKET_MAILER_MAILBOX`, `ROCKET_MAILER_SENDER` | Rocket Mailer (alertes). Vide : démo (`var/demo-mailer-<env>.json`). |
+| `AMAZON_ASSOCIATE_TAG` | Identifiant Partenaires Amazon des paniers pré-remplis. Vide par défaut. |
 | `STOCK_ALERT_EMAILS` | Destinataires des alertes de stock bas, séparés par des virgules. Vide (défaut) : aucune alerte. |
 | `ROCKET_AUTH_URL`, `ROCKET_AUTH_INTERNAL_URL`, `ROCKET_AUTH_CLIENT_ID` (`rocket-stock`), `ROCKET_AUTH_CLIENT_SECRET`, `ROCKET_AUTH_ADMIN_GROUP`, `ROCKET_PUBLIC_URL`, `ROCKET_INTERNAL_URL` | Mode suite. En suite, Place et Mailer sont appelés avec un jeton Rocket Auth (audiences `rocket-place`, `rocket-mailer`), les jetons statiques restent le repli. |
 

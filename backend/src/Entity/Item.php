@@ -47,6 +47,10 @@ class Item
     #[ORM\Column(length: 32, nullable: true)]
     private ?string $asin = null;
 
+    /** Barcode EAN-13 or EAN-8 (digits only, check digit validated by App\Ordering\Ean). */
+    #[ORM\Column(length: 13, nullable: true)]
+    private ?string $ean = null;
+
     /** Delivered on subscription: listed apart on the shopping list. */
     #[ORM\Column]
     private bool $subscription = false;
@@ -85,6 +89,8 @@ class Item
     public function setReorderQty(int $qty): static { $this->reorderQty = max(0, $qty); return $this; }
     public function getAsin(): ?string { return $this->asin; }
     public function setAsin(?string $asin): static { $this->asin = $asin; return $this; }
+    public function getEan(): ?string { return $this->ean; }
+    public function setEan(?string $ean): static { $this->ean = $ean; return $this; }
     public function isSubscription(): bool { return $this->subscription; }
     public function setSubscription(bool $s): static { $this->subscription = $s; return $this; }
     public function getUnitCost(): ?float { return $this->unitCost; }
@@ -99,7 +105,7 @@ class Item
     {
         return [
             'id' => $this->id->toRfc4122(), 'name' => $this->name, 'asin' => $this->asin, 'reorderQty' => $this->reorderQty,
-            'subscription' => $this->subscription, 'unit' => $this->unit, 'category' => $this->category, 'sku' => $this->sku,
+            'subscription' => $this->subscription, 'unit' => $this->unit, 'category' => $this->category, 'sku' => $this->sku, 'ean' => $this->ean,
             'reorderThreshold' => $this->reorderThreshold, 'unitCost' => $this->unitCost,
             'supplier' => null === $this->supplier ? null : ['id' => $this->supplier->getId()->toRfc4122(), 'name' => $this->supplier->getName()],
             'notes' => $this->notes, 'createdAt' => $this->getCreatedAt()?->format(\DATE_ATOM), 'updatedAt' => $this->getUpdatedAt()?->format(\DATE_ATOM),
