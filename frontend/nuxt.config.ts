@@ -11,10 +11,26 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'Rocket Stock',
+      // Installable app (manifest served by server/routes, service worker public/sw.js, plugins/pwa.client.ts).
+      link: [
+        { rel: 'manifest', href: '/manifest.webmanifest', key: 'manifest' },
+        { rel: 'icon', type: 'image/svg+xml', href: '/icon.svg' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
+      ],
+      meta: [
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
+        { name: 'theme-color', content: '#d97706' },
+        { name: 'mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
+        { name: 'apple-mobile-web-app-title', content: 'Stock' },
+      ],
     },
   },
   runtimeConfig: {
     public: {
+      // Service worker of the installable app: NUXT_PUBLIC_PWA=false switches it off (and unregisters it).
+      pwa: true,
       apiBase: 'http://localhost:9100',
       // Dashboard shortcuts.
       docsUrl: 'https://github.com/fayouz/rocket-stock/tree/develop/docs/content',
