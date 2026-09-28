@@ -2,7 +2,7 @@
 
 Toutes les évolutions notables de Rocket Stock. Format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versions [SemVer](https://semver.org/lang/fr/).
 
-## [Non publié]
+## [0.2.0] - 2026-09-28
 
 ### Ajouté
 - **Application installable (PWA)** sur Android et iPhone : manifeste (`/manifest.webmanifest`, ouverture sur `/courses`, raccourcis « Liste de courses » et « Panier » → `/courses/panier`, dernier panier non terminé), icônes 192/512 + maskable + apple-touch-icon (`frontend/scripts/pwa-icons.mjs`, sans dépendance), balises iOS, bouton « Installer l’application » (instructions Safari sur iPhone). Service worker écrit à la main (`/sw.js`) : assets `/_nuxt/` en cache d’abord, pages réseau d’abord avec page hors ligne, jamais `/api/` ; production seulement (`NUXT_PUBLIC_PWA=false` pour couper) ; « Nouvelle version disponible » à chaque déploiement. Panier hors ligne : dernières données gardées, badge « Hors ligne », lignes cochées mises en file puis rejouées.
