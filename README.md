@@ -44,6 +44,15 @@ php bin/phpunit
 cd frontend && npm install && NUXT_PUBLIC_API_BASE=http://localhost:9100 npm run dev -- --port 4100
 ```
 
+## Installer sur téléphone
+
+Application web installable (PWA), sans store :
+
+- **Android (Chrome)** : bouton **Installer l’application** (page *Courses*) ou menu ⋮ › *Installer l’application*.
+- **iPhone (Safari)** : **Partager** › **Sur l’écran d’accueil**.
+
+Ouverture sur `/courses`, raccourcis *Liste de courses* et *Panier*. Hors ligne, le panier garde ses dernières données (badge **Hors ligne**) et met en file les lignes cochées jusqu’au retour du réseau. Service worker actif en production seulement (`NUXT_PUBLIC_PWA=false` pour le couper). Icônes : `node frontend/scripts/pwa-icons.mjs`. Détails : `docs/content/2.usage/7.telephone.md`.
+
 ## Configuration
 
 | Variable | Rôle |
